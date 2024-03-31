@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules.padding import ReplicationPad2d
 
+
 class Unet(nn.Module):
     """EF segmentation network."""
 
@@ -49,8 +50,9 @@ class Unet(nn.Module):
         self.bn43 = nn.BatchNorm2d(128)
         self.do43 = nn.Dropout2d(p=0.2)
 
-
-        self.upconv4 = nn.ConvTranspose2d(128, 128, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv4 = nn.ConvTranspose2d(
+            128, 128, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv43d = nn.ConvTranspose2d(256, 128, kernel_size=3, padding=1)
         self.bn43d = nn.BatchNorm2d(128)
@@ -62,7 +64,9 @@ class Unet(nn.Module):
         self.bn41d = nn.BatchNorm2d(64)
         self.do41d = nn.Dropout2d(p=0.2)
 
-        self.upconv3 = nn.ConvTranspose2d(64, 64, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv3 = nn.ConvTranspose2d(
+            64, 64, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv33d = nn.ConvTranspose2d(128, 64, kernel_size=3, padding=1)
         self.bn33d = nn.BatchNorm2d(64)
@@ -74,7 +78,9 @@ class Unet(nn.Module):
         self.bn31d = nn.BatchNorm2d(32)
         self.do31d = nn.Dropout2d(p=0.2)
 
-        self.upconv2 = nn.ConvTranspose2d(32, 32, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv2 = nn.ConvTranspose2d(
+            32, 32, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv22d = nn.ConvTranspose2d(64, 32, kernel_size=3, padding=1)
         self.bn22d = nn.BatchNorm2d(32)
@@ -83,7 +89,9 @@ class Unet(nn.Module):
         self.bn21d = nn.BatchNorm2d(16)
         self.do21d = nn.Dropout2d(p=0.2)
 
-        self.upconv1 = nn.ConvTranspose2d(16, 16, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv1 = nn.ConvTranspose2d(
+            16, 16, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv12d = nn.ConvTranspose2d(32, 16, kernel_size=3, padding=1)
         self.bn12d = nn.BatchNorm2d(16)
@@ -119,10 +127,11 @@ class Unet(nn.Module):
         x43 = self.do43(F.relu(self.bn43(self.conv43(x42))))
         x4p = F.max_pool2d(x43, kernel_size=2, stride=2)
 
-
         # Stage 4d
         x4d = self.upconv4(x4p)
-        pad4 = ReplicationPad2d((0, x43.size(3) - x4d.size(3), 0, x43.size(2) - x4d.size(2)))
+        pad4 = ReplicationPad2d(
+            (0, x43.size(3) - x4d.size(3), 0, x43.size(2) - x4d.size(2))
+        )
         x4d = torch.cat((pad4(x4d), x43), 1)
         x43d = self.do43d(F.relu(self.bn43d(self.conv43d(x4d))))
         x42d = self.do42d(F.relu(self.bn42d(self.conv42d(x43d))))
@@ -130,7 +139,9 @@ class Unet(nn.Module):
 
         # Stage 3d
         x3d = self.upconv3(x41d)
-        pad3 = ReplicationPad2d((0, x33.size(3) - x3d.size(3), 0, x33.size(2) - x3d.size(2)))
+        pad3 = ReplicationPad2d(
+            (0, x33.size(3) - x3d.size(3), 0, x33.size(2) - x3d.size(2))
+        )
         x3d = torch.cat((pad3(x3d), x33), 1)
         x33d = self.do33d(F.relu(self.bn33d(self.conv33d(x3d))))
         x32d = self.do32d(F.relu(self.bn32d(self.conv32d(x33d))))
@@ -138,18 +149,20 @@ class Unet(nn.Module):
 
         # Stage 2d
         x2d = self.upconv2(x31d)
-        pad2 = ReplicationPad2d((0, x22.size(3) - x2d.size(3), 0, x22.size(2) - x2d.size(2)))
+        pad2 = ReplicationPad2d(
+            (0, x22.size(3) - x2d.size(3), 0, x22.size(2) - x2d.size(2))
+        )
         x2d = torch.cat((pad2(x2d), x22), 1)
         x22d = self.do22d(F.relu(self.bn22d(self.conv22d(x2d))))
         x21d = self.do21d(F.relu(self.bn21d(self.conv21d(x22d))))
 
         # Stage 1d
         x1d = self.upconv1(x21d)
-        pad1 = ReplicationPad2d((0, x12.size(3) - x1d.size(3), 0, x12.size(2) - x1d.size(2)))
+        pad1 = ReplicationPad2d(
+            (0, x12.size(3) - x1d.size(3), 0, x12.size(2) - x1d.size(2))
+        )
         x1d = torch.cat((pad1(x1d), x12), 1)
         x12d = self.do12d(F.relu(self.bn12d(self.conv12d(x1d))))
         x11d = self.conv11d(x12d)
 
         return self.sm(x11d)
-
-    

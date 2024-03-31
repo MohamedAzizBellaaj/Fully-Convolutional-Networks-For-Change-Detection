@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules.padding import ReplicationPad2d
 
+
 class SiamUnet_diff(nn.Module):
     """SiamUnet_diff segmentation network."""
 
@@ -49,7 +50,9 @@ class SiamUnet_diff(nn.Module):
         self.bn43 = nn.BatchNorm2d(128)
         self.do43 = nn.Dropout2d(p=0.2)
 
-        self.upconv4 = nn.ConvTranspose2d(128, 128, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv4 = nn.ConvTranspose2d(
+            128, 128, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv43d = nn.ConvTranspose2d(256, 128, kernel_size=3, padding=1)
         self.bn43d = nn.BatchNorm2d(128)
@@ -61,7 +64,9 @@ class SiamUnet_diff(nn.Module):
         self.bn41d = nn.BatchNorm2d(64)
         self.do41d = nn.Dropout2d(p=0.2)
 
-        self.upconv3 = nn.ConvTranspose2d(64, 64, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv3 = nn.ConvTranspose2d(
+            64, 64, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv33d = nn.ConvTranspose2d(128, 64, kernel_size=3, padding=1)
         self.bn33d = nn.BatchNorm2d(64)
@@ -73,7 +78,9 @@ class SiamUnet_diff(nn.Module):
         self.bn31d = nn.BatchNorm2d(32)
         self.do31d = nn.Dropout2d(p=0.2)
 
-        self.upconv2 = nn.ConvTranspose2d(32, 32, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv2 = nn.ConvTranspose2d(
+            32, 32, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv22d = nn.ConvTranspose2d(64, 32, kernel_size=3, padding=1)
         self.bn22d = nn.BatchNorm2d(32)
@@ -82,7 +89,9 @@ class SiamUnet_diff(nn.Module):
         self.bn21d = nn.BatchNorm2d(16)
         self.do21d = nn.Dropout2d(p=0.2)
 
-        self.upconv1 = nn.ConvTranspose2d(16, 16, kernel_size=3, padding=1, stride=2, output_padding=1)
+        self.upconv1 = nn.ConvTranspose2d(
+            16, 16, kernel_size=3, padding=1, stride=2, output_padding=1
+        )
 
         self.conv12d = nn.ConvTranspose2d(32, 16, kernel_size=3, padding=1)
         self.bn12d = nn.BatchNorm2d(16)
@@ -92,14 +101,11 @@ class SiamUnet_diff(nn.Module):
         self.sm = nn.LogSoftmax(dim=1)
 
     def forward(self, x1, x2):
-
-
         """Forward method."""
         # Stage 1
         x11 = self.do11(F.relu(self.bn11(self.conv11(x1))))
         x12_1 = self.do12(F.relu(self.bn12(self.conv12(x11))))
         x1p = F.max_pool2d(x12_1, kernel_size=2, stride=2)
-
 
         # Stage 2
         x21 = self.do21(F.relu(self.bn21(self.conv21(x1p))))
@@ -124,7 +130,6 @@ class SiamUnet_diff(nn.Module):
         x12_2 = self.do12(F.relu(self.bn12(self.conv12(x11))))
         x1p = F.max_pool2d(x12_2, kernel_size=2, stride=2)
 
-
         # Stage 2
         x21 = self.do21(F.relu(self.bn21(self.conv21(x1p))))
         x22_2 = self.do22(F.relu(self.bn22(self.conv22(x21))))
@@ -142,11 +147,11 @@ class SiamUnet_diff(nn.Module):
         x43_2 = self.do43(F.relu(self.bn43(self.conv43(x42))))
         x4p = F.max_pool2d(x43_2, kernel_size=2, stride=2)
 
-
-
         # Stage 4d
         x4d = self.upconv4(x4p)
-        pad4 = ReplicationPad2d((0, x43_1.size(3) - x4d.size(3), 0, x43_1.size(2) - x4d.size(2)))
+        pad4 = ReplicationPad2d(
+            (0, x43_1.size(3) - x4d.size(3), 0, x43_1.size(2) - x4d.size(2))
+        )
         x4d = torch.cat((pad4(x4d), torch.abs(x43_1 - x43_2)), 1)
         x43d = self.do43d(F.relu(self.bn43d(self.conv43d(x4d))))
         x42d = self.do42d(F.relu(self.bn42d(self.conv42d(x43d))))
@@ -154,7 +159,9 @@ class SiamUnet_diff(nn.Module):
 
         # Stage 3d
         x3d = self.upconv3(x41d)
-        pad3 = ReplicationPad2d((0, x33_1.size(3) - x3d.size(3), 0, x33_1.size(2) - x3d.size(2)))
+        pad3 = ReplicationPad2d(
+            (0, x33_1.size(3) - x3d.size(3), 0, x33_1.size(2) - x3d.size(2))
+        )
         x3d = torch.cat((pad3(x3d), torch.abs(x33_1 - x33_2)), 1)
         x33d = self.do33d(F.relu(self.bn33d(self.conv33d(x3d))))
         x32d = self.do32d(F.relu(self.bn32d(self.conv32d(x33d))))
@@ -162,18 +169,20 @@ class SiamUnet_diff(nn.Module):
 
         # Stage 2d
         x2d = self.upconv2(x31d)
-        pad2 = ReplicationPad2d((0, x22_1.size(3) - x2d.size(3), 0, x22_1.size(2) - x2d.size(2)))
+        pad2 = ReplicationPad2d(
+            (0, x22_1.size(3) - x2d.size(3), 0, x22_1.size(2) - x2d.size(2))
+        )
         x2d = torch.cat((pad2(x2d), torch.abs(x22_1 - x22_2)), 1)
         x22d = self.do22d(F.relu(self.bn22d(self.conv22d(x2d))))
         x21d = self.do21d(F.relu(self.bn21d(self.conv21d(x22d))))
 
         # Stage 1d
         x1d = self.upconv1(x21d)
-        pad1 = ReplicationPad2d((0, x12_1.size(3) - x1d.size(3), 0, x12_1.size(2) - x1d.size(2)))
+        pad1 = ReplicationPad2d(
+            (0, x12_1.size(3) - x1d.size(3), 0, x12_1.size(2) - x1d.size(2))
+        )
         x1d = torch.cat((pad1(x1d), torch.abs(x12_1 - x12_2)), 1)
         x12d = self.do12d(F.relu(self.bn12d(self.conv12d(x1d))))
         x11d = self.conv11d(x12d)
 
         return self.sm(x11d)
-
-    
