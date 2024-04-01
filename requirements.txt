@@ -1,3 +1,9 @@
+jupyter==1.0.0
+numpy==1.19.5
+imageio==2.9.0
+IPython==7.22.0
+scipy==1.10
+scikit-image==0.19.3
 matplotlib==3.6.3
 tqdm
 pandas
